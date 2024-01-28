@@ -9,10 +9,20 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faCross } from '@fortawesome/free-solid-svg-icons'
 import { faFire } from '@fortawesome/free-solid-svg-icons'
 import { faTree } from '@fortawesome/free-solid-svg-icons'
+import { faUpload } from '@fortawesome/free-solid-svg-icons'
+import { faPlay } from '@fortawesome/free-solid-svg-icons'
+import { faPause } from '@fortawesome/free-solid-svg-icons'
+import { faForwardStep } from '@fortawesome/free-solid-svg-icons'
+import { faForwardFast } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faCross)
 library.add(faFire)
 library.add(faTree)
+library.add(faUpload)
+library.add(faPlay)
+library.add(faPause)
+library.add(faForwardStep)
+library.add(faForwardFast)
 
 createApp(App)
     .component('font-awesome-icon', FontAwesomeIcon)

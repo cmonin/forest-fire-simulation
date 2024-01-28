@@ -20,15 +20,21 @@ const icon: Icon = computed(() => {
     case TreeState.DEAD:
       return { name: 'cross', color: 'grey' }
     default:
-      throw new Error('Tree state not supported')
+      throw new Error('Tree state not supported: ' + props.state)
   }
 })
 </script>
 
 <template>
-  <font-awesome-icon :icon="['fas', icon.name]"  :style="{ color: icon.color }" />
+  <div>
+    <font-awesome-icon :icon="['fas', icon.name]"  :style="{ color: icon.color }" />
+  </div>
 </template>
 
 <style scoped>
-/* TODO eventual sizes */
+  div {
+    display: inline-block;
+    width:18px;
+    text-align: center;
+  }
 </style>
