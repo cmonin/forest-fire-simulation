@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {TreeState} from "@/enums/TreeState";
+import {TreeState} from "@/types/TreeState";
 import Forest from "@/components/Forest.vue";
 
 </script>
@@ -14,7 +14,7 @@ import Forest from "@/components/Forest.vue";
   </header>
 
   <main>
-    <Forest :states="[[TreeState.BURNING, TreeState.DEAD, TreeState.ALIVE], [TreeState.ALIVE, TreeState.BURNING, TreeState.DEAD]]" />
+    <Forest :state="[[TreeState.BURNING, TreeState.DEAD, TreeState.ALIVE], [TreeState.ALIVE, TreeState.BURNING, TreeState.DEAD]]" />
   </main>
 </template>
 

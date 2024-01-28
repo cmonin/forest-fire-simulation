@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import {TreeState} from "@/enums/TreeState";
+import {TreeState} from "@/types/TreeState";
 
 const props = defineProps<{
   state: TreeState

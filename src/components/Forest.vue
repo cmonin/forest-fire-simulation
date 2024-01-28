@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import {TreeState} from "@/enums/TreeState";
 import Tree from "@/components/Tree.vue";
+import {ForestState} from "@/types/ForestState";
 
 const props = defineProps<{
-  states: TreeState[]
+  state: ForestState
 }>()
 </script>
 
 <template>
   <div>
-    <div v-for="rowStates in props.states">
+    <div v-for="rowStates in props.state">
       <Tree v-for="treeState in rowStates" :state="treeState"></Tree>
     </div>
   </div>
