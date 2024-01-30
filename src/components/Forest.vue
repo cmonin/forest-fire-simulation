@@ -22,9 +22,5 @@ function switchState(i: number, j: number) {
 </template>
 
 <style scoped>
-  .forest-container {
-    white-space: nowrap;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-  }
+
 </style>

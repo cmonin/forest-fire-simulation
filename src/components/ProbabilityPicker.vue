@@ -3,9 +3,7 @@ import {defineModel, computed } from "vue";
 
 const flammabilityModel: number = defineModel('flammability')
 const props = defineProps<{
-  min: string,
-  max: string,
-  step: string,
+  label: string,
   width: string,
   backgroundColor: string,
   thumbWidth: string,
@@ -24,15 +22,17 @@ const opacity: string = computed(() => {
 </script>
 
 <template>
+  <label>{{ props.label }}</label>
   <input
       type="range"
       v-model="flammabilityModel"
-      :min="props.min"
-      :max="props.max"
-      :step="props.step"
+      min="0"
+      max="1"
+      step="0.01"
       :disabled="props.disabled"
       :style="{ background: background, opacity: opacity}"
   />
+  {{ Math.round(flammabilityModel * 100) }}%
 </template>
 
 <style scoped>

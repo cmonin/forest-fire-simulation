@@ -1,18 +1,22 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import type {ForestState} from "@/types/ForestState";
-import FileReader from "@/components/FileReader.vue";
+import FileReader from "@/components/fields/FileReader.vue";
 import type {TreeState} from "@/types/TreeState";
 import Forest from "@/components/Forest.vue";
-import {computeBurningTreesCount, computeDeadTreesCount, nextForestState} from "@/behaviour/ForestFire";
-import Dashboard from "@/components/Dashboard.vue";
-import RangePicker from "@/components/RangePicker.vue";
+import {
+  computeStatesCount,
+  nextForestState
+} from "@/behaviour/ForestFire";
+import ProbabilityPicker from "@/components/ProbabilityPicker.vue";
+import TextField from "@/components/fields/TextField.vue";
+import type {StatesCount} from "@/types/StatesCount";
 
 const flammability: number = ref(0)
 const forestState: ForestState = ref([])
 const isInitiatingConfiguration: boolean = ref(true)
 const stepsCount: number = ref(0)
-const deadTreesCount: number = ref(0)
+const statesCount: StatesCount = ref({alive: 0, burning: 0, dead: 0});
 const fireKeepsSpreading: boolean = ref(true)
 
 
@@ -24,30 +28,34 @@ const startOrStopButtonLabel: string = computed(() => {
 });
 
 
-let last; // timestamp of the last render() call
+let lastAnimationMoment; // timestamp of the last render() call
 let handle;
 
 function startOrStopAnimation() {
   if (isAnimating.value && handle) {
     cancelAnimationFrame(handle)
   } else {
-    animateNext()
+    doAnimate()
   }
+  isAnimating.
   isAnimating.value = !isAnimating.value;
 }
 
-function animateNext() {
-  if (!last) {
-    last = performance.now() - animationTimeInSeconds.value * 500
+function doAnimate() {
+  function animationTimePassedSinceLast(): boolean {
+    return performance.now() - lastAnimationMoment >= animationTimeInSeconds.value * 1000;
   }
-  if(performance.now() - last >= animationTimeInSeconds.value * 1000) {
-    last = performance.now();
+  if (!lastAnimationMoment) {
+    lastAnimationMoment = performance.now() - animationTimeInSeconds.value * 500
+  }
+  if (animationTimePassedSinceLast()) {
+    lastAnimationMoment = performance.now();
     if (fireKeepsSpreading.value) {
       spreadFire();
     }
   }
   if (fireKeepsSpreading.value) {
-    handle = requestAnimationFrame(animateNext);
+    handle = requestAnimationFrame(doAnimate);
   } else {
     cancelAnimationFrame(handle)
   }
@@ -65,11 +73,12 @@ function handleClickLaunchButton() {
 }
 
 function spreadFire() {
-  const newForestState = nextForestState(forestState.value, flammability.value)
-  forestState.value = newForestState
   stepsCount.value++
-  deadTreesCount.value = computeDeadTreesCount(newForestState)
-  fireKeepsSpreading.value = (computeBurningTreesCount(newForestState) > 0)
+  const newForestState = nextForestState(forestState.value, flammability.value)
+  const newStatesCount = computeStatesCount(newForestState)
+  forestState.value = newForestState
+  statesCount.value = newStatesCount
+  fireKeepsSpreading.value = (newStatesCount.burning > 0)
 }
 
 function parseTextToForestState(textRows: string[]): ForestState {
@@ -87,24 +96,29 @@ function parseTextToForestState(textRows: string[]): ForestState {
 </script>
 
 <template>
-  <FileReader v-if="isInitiatingConfiguration" @load="readTextFile"></FileReader>
-  <div>
-    <label>Flammability</label>
-    <RangePicker v-model:flammability="flammability"
-                 :disabled="!isInitiatingConfiguration"
-                 min="0"
-                 max="1"
-                 step="0.01"
-                 width="220px"
-                 background-color="#f50"
-                 thumb-height="30px"
-                 thumb-width="20px"
-                 thumb-image="url('./src/assets/flame.png')"
-    />
-    {{ Math.round(flammability * 100) }}%
-  </div>
-  <div>
-    <Forest :state="forestState" :editingEnabled="isInitiatingConfiguration" />
+  <div class="simulation-container">
+
+    <div class="simulation-map">
+      <FileReader v-if="isInitiatingConfiguration" @load="readTextFile" label="Upload a configuration file"></FileReader>
+      <ProbabilityPicker v-model:flammability="flammability"
+                         :disabled="!isInitiatingConfiguration"
+                         label="Flammability"
+                         width="160px"
+                         background-color="#f50"
+                         thumb-height="30px"
+                         thumb-width="20px"
+                         thumb-image="url('./src/assets/flame.png')"
+      />
+      <Forest :state="forestState" :editingEnabled="isInitiatingConfiguration" />
+    </div>
+
+    <div class="simulation-dashboard">
+      <TextField label="Step" :value="stepsCount" />
+      <TextField label="Living trees" :value="statesCount.alive" />
+      <TextField label="Burning trees" :value="statesCount.burning" />
+      <TextField label="Dead trees" :value="statesCount.dead" />
+    </div>
+
   </div>
   <div class="init-commands" v-if="isInitiatingConfiguration" >
     <button @click="handleClickLaunchButton">Launch a simulation</button>
@@ -117,9 +131,23 @@ function parseTextToForestState(textRows: string[]): ForestState {
     </div>
 
   </div>
-  <Dashboard :dead-trees-count="deadTreesCount" :steps-count="stepsCount" />
+
 </template>
 
 <style scoped>
+.simulation-container {
+  display: flex;
+  justify-content: space-between;
+}
+.simulation-map {
+  white-space: nowrap;
+  overflow-y: auto;
+  height: calc(100vh - 200px);
+}
 
+.simulation-dashboard {
+  width: 210px;
+  height: calc(100vh - 200px);
+  background: lightblue;
+}
 </style>

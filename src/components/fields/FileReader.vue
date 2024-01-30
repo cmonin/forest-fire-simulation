@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const props = defineProps<{
+  label: string
+}>()
 const emit = defineEmits<{
   load: [text: string]
 }>()
@@ -31,11 +34,11 @@ function loadConfigFile(e, files = e.target.files) {
 
 <template>
   <label class="text-reader">
-    Upload a configuration file
-    <input type="file" @change="loadConfigFile" />
-    <div v-if="isLoading">Loading...</div>
-    <div v-if="errorDuringLoading">Error during loading</div>
+    {{ props.label }}
   </label>
+  <input type="file" @change="loadConfigFile" />
+  <div v-if="isLoading">Loading...</div>
+  <div v-if="errorDuringLoading">Error during loading</div>
 </template>
 
 <style scoped>
