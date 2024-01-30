@@ -40,10 +40,13 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: v-bind('props.width');
-  cursor: pointer;
   outline: none;
   border-radius: 15px;
   height: 6px;
+}
+
+input[type="range"]:not(:disabled) {
+  cursor: pointer;
 }
 
 input[type="range"]::-webkit-slider-thumb {

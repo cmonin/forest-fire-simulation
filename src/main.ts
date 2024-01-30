@@ -13,7 +13,9 @@ import { faUpload } from '@fortawesome/free-solid-svg-icons'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { faPause } from '@fortawesome/free-solid-svg-icons'
 import { faForwardStep } from '@fortawesome/free-solid-svg-icons'
-import { faForwardFast } from '@fortawesome/free-solid-svg-icons'
+import { faForward } from '@fortawesome/free-solid-svg-icons'
+import { faCircleStop } from '@fortawesome/free-solid-svg-icons'
+import { faRotateRight } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faCross)
 library.add(faFire)
@@ -22,7 +24,9 @@ library.add(faUpload)
 library.add(faPlay)
 library.add(faPause)
 library.add(faForwardStep)
-library.add(faForwardFast)
+library.add(faForward)
+library.add(faCircleStop)
+library.add(faRotateRight)
 
 createApp(App)
     .component('font-awesome-icon', FontAwesomeIcon)

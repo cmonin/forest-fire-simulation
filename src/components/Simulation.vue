@@ -3,41 +3,47 @@ import { ref, computed } from 'vue'
 import type {ForestState} from "@/types/ForestState";
 import FileReader from "@/components/fields/FileReader.vue";
 import type {TreeState} from "@/types/TreeState";
-import Forest from "@/components/Forest.vue";
+import Forest from "@/components/map/Forest.vue";
 import {
   computeStatesCount,
   nextForestState
-} from "@/behaviour/ForestFire";
-import ProbabilityPicker from "@/components/ProbabilityPicker.vue";
+} from "@/engine/ForestFire";
+import ProbabilityPicker from "@/components/fields/ProbabilityPicker.vue";
 import TextField from "@/components/fields/TextField.vue";
 import type {StatesCount} from "@/types/StatesCount";
+import IconButton from "@/components/fields/IconButton.vue";
 
+const fileUploaded: boolean = ref(false)
 const flammability: number = ref(0)
 const forestState: ForestState = ref([])
 const isInitiatingConfiguration: boolean = ref(true)
 const stepsCount: number = ref(0)
-const statesCount: StatesCount = ref({alive: 0, burning: 0, dead: 0});
-const fireKeepsSpreading: boolean = ref(true)
-
-
 const isAnimating: boolean = ref(false)
-const animationTimeInSeconds: number = ref(0.1)
 
-const startOrStopButtonLabel: string = computed(() => {
-  return isAnimating.value ? 'Stop' : 'Start'
+const animationTimeInSeconds: number = ref(2)
+
+
+const statesCount: StatesCount = computed(() => {
+  return computeStatesCount(forestState.value)
 });
+
+const playOrPauseButtonIcon: string = computed(() => {
+  return isAnimating.value ? 'pause' : 'play'
+});
+
 
 
 let lastAnimationMoment; // timestamp of the last render() call
 let handle;
 
+
 function startOrStopAnimation() {
+  isInitiatingConfiguration.value = false
   if (isAnimating.value && handle) {
     cancelAnimationFrame(handle)
   } else {
     doAnimate()
   }
-  isAnimating.
   isAnimating.value = !isAnimating.value;
 }
 
@@ -48,13 +54,14 @@ function doAnimate() {
   if (!lastAnimationMoment) {
     lastAnimationMoment = performance.now() - animationTimeInSeconds.value * 500
   }
+  const fireSpreads = statesCount.value.burning > 0
   if (animationTimePassedSinceLast()) {
     lastAnimationMoment = performance.now();
-    if (fireKeepsSpreading.value) {
+    if (fireSpreads) {
       spreadFire();
     }
   }
-  if (fireKeepsSpreading.value) {
+  if (fireSpreads) {
     handle = requestAnimationFrame(doAnimate);
   } else {
     cancelAnimationFrame(handle)
@@ -66,6 +73,7 @@ function readTextFile(text: string) {
   const textRows: string[] = text.split('\n')
   flammability.value = textRows.shift();
   forestState.value = parseTextToForestState(textRows)
+  fileUploaded.value = true
 }
 
 function handleClickLaunchButton() {
@@ -73,12 +81,9 @@ function handleClickLaunchButton() {
 }
 
 function spreadFire() {
+  isInitiatingConfiguration.value = false
   stepsCount.value++
-  const newForestState = nextForestState(forestState.value, flammability.value)
-  const newStatesCount = computeStatesCount(newForestState)
-  forestState.value = newForestState
-  statesCount.value = newStatesCount
-  fireKeepsSpreading.value = (newStatesCount.burning > 0)
+  forestState.value = nextForestState(forestState.value, flammability.value)
 }
 
 function parseTextToForestState(textRows: string[]): ForestState {
@@ -93,44 +98,57 @@ function parseTextToForestState(textRows: string[]): ForestState {
   return res
 }
 
+function retry() {
+  fileUploaded.value = false
+  flammability.value = 0
+  forestState.value = []
+  isInitiatingConfiguration.value = true
+  stepsCount.value = 0
+  isAnimating.value = false
+}
+
 </script>
 
 <template>
-  <div class="simulation-container">
+  <FileReader v-if="!fileUploaded" @load="readTextFile" label="Upload a configuration file"></FileReader>
+  <div v-if="fileUploaded" class="simulation-container">
 
-    <div class="simulation-map">
-      <FileReader v-if="isInitiatingConfiguration" @load="readTextFile" label="Upload a configuration file"></FileReader>
-      <ProbabilityPicker v-model:flammability="flammability"
-                         :disabled="!isInitiatingConfiguration"
-                         label="Flammability"
-                         width="160px"
-                         background-color="#f50"
-                         thumb-height="30px"
-                         thumb-width="20px"
-                         thumb-image="url('./src/assets/flame.png')"
-      />
-      <Forest :state="forestState" :editingEnabled="isInitiatingConfiguration" />
+    <div class="simulation-control">
+      <div class="simulation-control-map">
+        <ProbabilityPicker v-model:flammability="flammability"
+                           :disabled="!isInitiatingConfiguration"
+                           label="Burn probability"
+                           width="200px"
+                           background-color="#f50"
+                           thumb-height="30px"
+                           thumb-width="20px"
+                           thumb-image="url('./src/assets/flame.png')"
+        />
+        <Forest class="simulation-forest" v-model:state="forestState" :editingEnabled="isInitiatingConfiguration" />
+      </div>
+      <div class="simulation-control-time">
+
+        <IconButton v-if="statesCount.burning > 0" @click="startOrStopAnimation" :icon="playOrPauseButtonIcon" />
+        <IconButton v-if="statesCount.burning > 0" @click="spreadFire" icon="forward-step" :disabled="isAnimating" />
+
+        <IconButton v-if="statesCount.burning === 0" @click="retry" icon="rotate-right" />
+
+      </div>
     </div>
 
     <div class="simulation-dashboard">
-      <TextField label="Step" :value="stepsCount" />
-      <TextField label="Living trees" :value="statesCount.alive" />
-      <TextField label="Burning trees" :value="statesCount.burning" />
-      <TextField label="Dead trees" :value="statesCount.dead" />
+      <section class="caption">
+        <TextField label="Living trees" :value="statesCount.alive" icon="tree" icon-color="green" />
+        <TextField label="Burning trees" :value="statesCount.burning" icon="fire" icon-color="darkorange" />
+        <TextField label="Dead trees" :value="statesCount.dead" icon="cross" icon-color="grey" />
+      </section>
+      <section style="text-align: center">
+        t = {{ stepsCount }}
+      </section>
     </div>
 
   </div>
-  <div class="init-commands" v-if="isInitiatingConfiguration" >
-    <button @click="handleClickLaunchButton">Launch a simulation</button>
-  </div>
-  <div class="simulation-commands" v-if="!isInitiatingConfiguration">
-    <button v-if="fireKeepsSpreading" @click="startOrStopAnimation">{{ startOrStopButtonLabel }}</button>
-    <button v-if="fireKeepsSpreading" @click="spreadFire" :disabled="isAnimating">Next step</button>
-    <div v-if="!fireKeepsSpreading">
-      End
-    </div>
 
-  </div>
 
 </template>
 
@@ -139,15 +157,38 @@ function parseTextToForestState(textRows: string[]): ForestState {
   display: flex;
   justify-content: space-between;
 }
-.simulation-map {
+
+.simulation-control,
+.simulation-dashboard {
+  height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+}
+
+.simulation-control {
+  max-width: calc(100% - 180px);
+}
+
+.caption,
+.simulation-forest {
   white-space: nowrap;
   overflow-y: auto;
-  height: calc(100vh - 200px);
+  margin-bottom: 24px;
+}
+
+.simulation-forest {
+  margin-top: 32px;
+  max-height: calc(100vh - 250px);
+}
+.simulation-control-time {
+  text-align: center;
 }
 
 .simulation-dashboard {
-  width: 210px;
-  height: calc(100vh - 200px);
-  background: lightblue;
+  width: 180px;
+  padding: 0 0 0 16px;
 }
+
 </style>

@@ -29,6 +29,10 @@ export function nextForestState(forestState: ForestState, flammability: number):
     return res;
 }
 
+/**
+ * Count living, burning and dead trees in a forest state
+ * @param forestState
+ */
 export function computeStatesCount(forestState: ForestState): StatesCount {
     const statesCount: StatesCount = {
         'alive': 0,
@@ -73,10 +77,6 @@ function cloneForestState(forestState: ForestState): ForestState {
         res.push(row);
     }
     return res;
-}
-
-function treeIsBurnable(treeCoordinates: TreeCoordinates, forestState: ForestState): boolean {
-    return treeIsAlive(treeCoordinates, forestState) && burningNeighboursCount(treeCoordinates, forestState);
 }
 
 function treeIsBurning(treeCoordinates: TreeCoordinates, forestState: ForestState): boolean {

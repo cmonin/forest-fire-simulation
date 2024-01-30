@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
     nextForestState,
     treeIsInForest
-} from "@/behaviour/ForestFire";
+} from "@/engine/ForestFire";
 import {TreeState} from "@/types/TreeState";
 
 describe('ForestFire', (): void => {
