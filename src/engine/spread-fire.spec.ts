@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import {
     nextForestState,
     treeIsInForest
-} from "@/engine/SpreadFire";
-import type {ForestState} from "@/types/ForestState";
+} from "@/engine/spread-fire";
+import type {ForestState} from "@/types/forest-state";
 
 describe('Next forest state', (): void => {
 

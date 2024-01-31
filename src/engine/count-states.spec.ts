@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import {countStates} from "@/engine/CountStates";
-import type {StatesCount} from "@/types/StatesCount";
+import {countStates} from "@/engine/count-states";
+import type {StatesCount} from "@/types/states-count";
 
 describe('Forest states count', (): void => {
 

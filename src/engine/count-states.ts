@@ -1,6 +1,6 @@
-import {TreeState} from "@/types/TreeState";
-import type {StatesCount} from "@/types/StatesCount";
-import type {ForestState} from "@/types/ForestState";
+import {TreeState} from "@/types/tree-state";
+import type {StatesCount} from "@/types/states-count";
+import type {ForestState} from "@/types/forest-state";
 
 /**
  * Count living, burning and dead trees in a forest state
@@ -11,6 +11,9 @@ export function countStates(forestState: ForestState): StatesCount {
         'alive': 0,
         'burning': 0,
         'dead': 0
+    }
+    if (!forestState) {
+        return statesCount
     }
     for (let i = 0; i < forestState.length; i++) {
         for (let j = 0; j < forestState[i].length; j++) {

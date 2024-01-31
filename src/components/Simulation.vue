@@ -1,15 +1,15 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import type {ForestState} from "@/types/ForestState";
+import type {ForestState} from "@/types/forest-state";
 import FileReader from "@/components/fields/FileReader.vue";
-import type {TreeState} from "@/types/TreeState";
 import Forest from "@/components/map/Forest.vue";
-import {nextForestState} from "@/engine/SpreadFire";
-import {countStates} from "@/engine/CountStates";
+import {nextForestState} from "@/engine/spread-fire";
+import {countStates} from "@/engine/count-states";
 import ProbabilityPicker from "@/components/fields/ProbabilityPicker.vue";
 import TextField from "@/components/fields/TextField.vue";
-import type {StatesCount} from "@/types/StatesCount";
+import type {StatesCount} from "@/types/states-count";
 import IconButton from "@/components/fields/IconButton.vue";
+import {parseFile} from "@/engine/config-parser";
 
 const fileUploaded: boolean = ref(false)
 const burnProbability: number = ref(0)
@@ -20,22 +20,14 @@ const isAnimating: boolean = ref(false)
 
 const animationTimeInSeconds: number = ref(2)
 
-
-const statesCount: StatesCount = computed(() => {
-  return countStates(forestState.value)
-});
-
-const playOrPauseButtonIcon: string = computed(() => {
-  return isAnimating.value ? 'pause' : 'play'
-});
-
-
+const statesCount: StatesCount = computed(() => countStates(forestState.value))
+const playOrPauseButtonIcon: string = computed(() => isAnimating.value ? 'pause' : 'play')
 
 let lastAnimationMoment; // timestamp of the last render() call
 let handle;
 
-
-function startOrStopAnimation() {
+function startOrStopAnimationSlow() {
+  animationTimeInSeconds.value = 2
   isInitiatingConfiguration.value = false
   if (isAnimating.value && handle) {
     cancelAnimationFrame(handle)
@@ -43,6 +35,18 @@ function startOrStopAnimation() {
     doAnimate()
   }
   isAnimating.value = !isAnimating.value;
+}
+function startAnimationFast() {
+  animationTimeInSeconds.value = 0.2
+  if (!isAnimating.value) {
+    doAnimate()
+    isAnimating.value = true
+  }
+}
+function spreadFireToEnd() {
+  while (statesCount.value.burning > 0) {
+    spreadFire()
+  }
 }
 
 function doAnimate() {
@@ -66,34 +70,17 @@ function doAnimate() {
   }
 }
 
-
-function readTextFile(text: string) {
-  const textRows: string[] = text.split('\n')
-  burnProbability.value = textRows.shift();
-  forestState.value = parseTextToForestState(textRows)
+function readFile(text: string) {
+  const parsedFile = parseFile(text)
+  burnProbability.value = parsedFile.burnProbability
+  forestState.value = parsedFile.forestState
   fileUploaded.value = true
-}
-
-function handleClickLaunchButton() {
-  isInitiatingConfiguration.value = false
 }
 
 function spreadFire() {
   isInitiatingConfiguration.value = false
   stepsCount.value++
   forestState.value = nextForestState(forestState.value, burnProbability.value)
-}
-
-function parseTextToForestState(textRows: string[]): ForestState {
-  const res: ForestState = [];
-  textRows.forEach((textRow: string) => {
-    const states: TreeState[] = textRow
-        .replace(' ', '')
-        .split('')
-        .map((char: string) => parseInt(char))
-    res.push(states);
-  })
-  return res
 }
 
 function retry() {
@@ -108,7 +95,7 @@ function retry() {
 </script>
 
 <template>
-  <FileReader v-if="!fileUploaded" @load="readTextFile" label="Upload a configuration file"></FileReader>
+  <FileReader v-if="!fileUploaded" @load="readFile" label="Upload a configuration file"></FileReader>
   <div v-if="fileUploaded" class="simulation-container">
 
     <div class="simulation-control">
@@ -116,7 +103,6 @@ function retry() {
         <ProbabilityPicker v-model:burn-probability="burnProbability"
                            :disabled="!isInitiatingConfiguration"
                            label="Burn probability"
-                           width="200px"
                            background-color="#f50"
                            thumb-height="30px"
                            thumb-width="20px"
@@ -126,7 +112,9 @@ function retry() {
       </div>
       <div class="simulation-control-time">
 
-        <IconButton v-if="statesCount.burning > 0" @click="startOrStopAnimation" :icon="playOrPauseButtonIcon" />
+        <IconButton v-if="statesCount.burning > 0" @click="startOrStopAnimationSlow" :icon="playOrPauseButtonIcon" />
+        <IconButton v-if="statesCount.burning > 0" @click="startAnimationFast" icon="forward" />
+        <IconButton v-if="statesCount.burning > 0" @click="spreadFireToEnd" icon="forward-fast" />
         <IconButton v-if="statesCount.burning > 0" @click="spreadFire" icon="forward-step" :disabled="isAnimating" />
 
         <IconButton v-if="statesCount.burning === 0" @click="retry" icon="rotate-right" />
@@ -146,7 +134,6 @@ function retry() {
     </div>
 
   </div>
-
 
 </template>
 

@@ -1,5 +1,5 @@
-import type {ForestState} from "@/types/ForestState";
-import {TreeState} from "@/types/TreeState";
+import type {ForestState} from "@/types/forest-state";
+import {TreeState} from "@/types/tree-state";
 
 type TreeCoordinates = {
     x: number;

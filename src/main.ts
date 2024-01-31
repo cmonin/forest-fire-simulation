@@ -14,6 +14,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { faPause } from '@fortawesome/free-solid-svg-icons'
 import { faForwardStep } from '@fortawesome/free-solid-svg-icons'
 import { faForward } from '@fortawesome/free-solid-svg-icons'
+import { faForwardFast } from '@fortawesome/free-solid-svg-icons'
 import { faCircleStop } from '@fortawesome/free-solid-svg-icons'
 import { faRotateRight } from '@fortawesome/free-solid-svg-icons'
 
@@ -25,6 +26,7 @@ library.add(faPlay)
 library.add(faPause)
 library.add(faForwardStep)
 library.add(faForward)
+library.add(faForwardFast)
 library.add(faCircleStop)
 library.add(faRotateRight)
 

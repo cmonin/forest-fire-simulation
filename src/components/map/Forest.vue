@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Tree from "@/components/map/Tree.vue";
-import {ForestState} from "@/types/ForestState";
+import {ForestState} from "@/types/forest-state";
 import {defineModel} from "vue";
 
 const stateModel: ForestState = defineModel('state')

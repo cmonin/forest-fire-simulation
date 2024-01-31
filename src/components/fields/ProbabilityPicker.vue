@@ -4,7 +4,6 @@ import {defineModel, computed } from "vue";
 const flammabilityModel: number = defineModel('burnProbability')
 const props = defineProps<{
   label: string,
-  width: string,
   backgroundColor: string,
   thumbWidth: string,
   thumbHeight: string,
@@ -39,7 +38,7 @@ const opacity: string = computed(() => {
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  width: v-bind('props.width');
+  width: 200px;
   outline: none;
   border-radius: 15px;
   height: 6px;
