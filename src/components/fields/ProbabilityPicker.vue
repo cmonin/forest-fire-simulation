@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {defineModel, computed } from "vue";
 
-const flammabilityModel: number = defineModel('flammability')
+const flammabilityModel: number = defineModel('burnProbability')
 const props = defineProps<{
   label: string,
   width: string,

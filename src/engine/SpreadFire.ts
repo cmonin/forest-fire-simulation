@@ -7,15 +7,15 @@ type TreeCoordinates = {
 }
 
 /**
- * Compute next forest state, given current state, and global flammability between 0 and 1
+ * Compute next forest state, given current state, and global burnProbability between 0 and 1
  * @param forestState
- * @param flammability
+ * @param burnProbability
  */
-export function nextForestState(forestState: ForestState, flammability: number): ForestState {
+export function nextForestState(forestState: ForestState, burnProbability: number): ForestState {
     const res: ForestState = cloneForestState(forestState);
     for (let i = 0; i < forestState.length; i++) {
         for (let j = 0; j < forestState[i].length; j++) {
-            res[i][j] = nextTreeState(forestState[i][j], () => burntByNeighbours(computeBurningNeighboursCount({x: i, y: j}, forestState), flammability))
+            res[i][j] = nextTreeState(forestState[i][j], () => burntByNeighbours(computeBurningNeighboursCount({x: i, y: j}, forestState), burnProbability))
         }
     }
     return res;

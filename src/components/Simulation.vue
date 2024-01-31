@@ -12,7 +12,7 @@ import type {StatesCount} from "@/types/StatesCount";
 import IconButton from "@/components/fields/IconButton.vue";
 
 const fileUploaded: boolean = ref(false)
-const flammability: number = ref(0)
+const burnProbability: number = ref(0)
 const forestState: ForestState = ref([])
 const isInitiatingConfiguration: boolean = ref(true)
 const stepsCount: number = ref(0)
@@ -69,7 +69,7 @@ function doAnimate() {
 
 function readTextFile(text: string) {
   const textRows: string[] = text.split('\n')
-  flammability.value = textRows.shift();
+  burnProbability.value = textRows.shift();
   forestState.value = parseTextToForestState(textRows)
   fileUploaded.value = true
 }
@@ -81,7 +81,7 @@ function handleClickLaunchButton() {
 function spreadFire() {
   isInitiatingConfiguration.value = false
   stepsCount.value++
-  forestState.value = nextForestState(forestState.value, flammability.value)
+  forestState.value = nextForestState(forestState.value, burnProbability.value)
 }
 
 function parseTextToForestState(textRows: string[]): ForestState {
@@ -98,7 +98,7 @@ function parseTextToForestState(textRows: string[]): ForestState {
 
 function retry() {
   fileUploaded.value = false
-  flammability.value = 0
+  burnProbability.value = 0
   forestState.value = []
   isInitiatingConfiguration.value = true
   stepsCount.value = 0
@@ -113,7 +113,7 @@ function retry() {
 
     <div class="simulation-control">
       <div class="simulation-control-map">
-        <ProbabilityPicker v-model:flammability="flammability"
+        <ProbabilityPicker v-model:burn-probability="burnProbability"
                            :disabled="!isInitiatingConfiguration"
                            label="Burn probability"
                            width="200px"
