@@ -1,6 +1,5 @@
 import type {ForestState} from "@/types/ForestState";
 import {TreeState} from "@/types/TreeState";
-import type {StatesCount} from "@/types/StatesCount";
 
 type TreeCoordinates = {
     x: number;
@@ -16,52 +15,35 @@ export function nextForestState(forestState: ForestState, flammability: number):
     const res: ForestState = cloneForestState(forestState);
     for (let i = 0; i < forestState.length; i++) {
         for (let j = 0; j < forestState[i].length; j++) {
-            const treeCoord: TreeCoordinates = {x: i, y: j};
-            if (treeIsBurning(treeCoord, forestState)) {
-                res[i][j] = TreeState.DEAD;
-            } else if (treeIsAlive(treeCoord, forestState)) {
-                if (burntByNeighbours(computeBurningNeighboursCount(treeCoord, forestState), flammability)) {
-                    res[i][j] = TreeState.BURNING;
-                }
-            }
+            res[i][j] = nextTreeState(forestState[i][j], () => burntByNeighbours(computeBurningNeighboursCount({x: i, y: j}, forestState), flammability))
         }
     }
     return res;
 }
-
-/**
- * Count living, burning and dead trees in a forest state
- * @param forestState
- */
-export function computeStatesCount(forestState: ForestState): StatesCount {
-    const statesCount: StatesCount = {
-        'alive': 0,
-        'burning': 0,
-        'dead': 0
+function nextTreeState(currentTreeState: TreeState, treeBurntByNeighbours: () => boolean): TreeState {
+    switch(currentTreeState) {
+        case TreeState.ALIVE:
+            return treeBurntByNeighbours() ? TreeState.BURNING : TreeState.ALIVE
+        case TreeState.BURNING:
+        case TreeState.DEAD:
+            return TreeState.DEAD
+        default:
+            throw new Error('TreeState not supported: ' + currentTreeState)
     }
-    for (let i = 0; i < forestState.length; i++) {
-        for (let j = 0; j < forestState[i].length; j++) {
-            switch (forestState[i][j]) {
-                case TreeState.ALIVE:
-                    statesCount.alive++
-                    break
-                case TreeState.BURNING:
-                    statesCount.burning++
-                    break
-                case TreeState.DEAD:
-                    statesCount.dead++
-                    break
-            }
-        }
-    }
-    return statesCount;
 }
 
+/**
+ * Try to burn a tree, given a probability to be burnt for each burning tree in the neighbourhood
+ * @param burningNeighboursCount
+ * @param flammability
+ */
 function burntByNeighbours(burningNeighboursCount: number, flammability: number) {
-    for (let i = 0; i < burningNeighboursCount; i++) {
+    let i = 0
+    while (i < burningNeighboursCount) {
         if (Math.random() < flammability) {
             return true;
         }
+        i++
     }
     return false
 }
@@ -79,20 +61,24 @@ function cloneForestState(forestState: ForestState): ForestState {
     return res;
 }
 
-function treeIsBurning(treeCoordinates: TreeCoordinates, forestState: ForestState): boolean {
-    return forestState[treeCoordinates.x][treeCoordinates.y] === TreeState.BURNING;
-}
-
-function treeIsAlive(treeCoordinates: TreeCoordinates, forestState: ForestState): boolean {
-    return forestState[treeCoordinates.x][treeCoordinates.y] === TreeState.ALIVE;
-}
+/**
+ * Count burning neighbours of a tree in a forest
+ * @param treeCoordinates
+ * @param forestState
+ */
 function computeBurningNeighboursCount(treeCoordinates: TreeCoordinates, forestState: ForestState): number {
-    const burningNeighbours: TreeCoordinates[] = getNeighboursCoordinates(treeCoordinates, forestState).filter((neighbourCoord: TreeCoordinates) => {
-        return forestState[neighbourCoord.x][neighbourCoord.y] === TreeState.BURNING;
-    });
+    const burningNeighbours: TreeCoordinates[] = getNeighboursCoordinates(treeCoordinates, forestState)
+        .filter((neighbourCoord: TreeCoordinates) => {
+            return forestState[neighbourCoord.x][neighbourCoord.y] === TreeState.BURNING;
+        });
     return burningNeighbours.length;
 }
 
+/**
+ * Return coordinates of all trees in the neighbourhood of a tree in a forest
+ * @param treeCoordinates
+ * @param forestState
+ */
 function getNeighboursCoordinates(treeCoordinates: TreeCoordinates, forestState: ForestState): TreeCoordinates[] {
     const res: TreeCoordinates[] = [];
     const treeTop: TreeCoordinates = {

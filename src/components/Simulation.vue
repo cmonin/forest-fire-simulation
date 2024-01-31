@@ -4,10 +4,8 @@ import type {ForestState} from "@/types/ForestState";
 import FileReader from "@/components/fields/FileReader.vue";
 import type {TreeState} from "@/types/TreeState";
 import Forest from "@/components/map/Forest.vue";
-import {
-  computeStatesCount,
-  nextForestState
-} from "@/engine/ForestFire";
+import {nextForestState} from "@/engine/SpreadFire";
+import {countStates} from "@/engine/CountStates";
 import ProbabilityPicker from "@/components/fields/ProbabilityPicker.vue";
 import TextField from "@/components/fields/TextField.vue";
 import type {StatesCount} from "@/types/StatesCount";
@@ -24,7 +22,7 @@ const animationTimeInSeconds: number = ref(2)
 
 
 const statesCount: StatesCount = computed(() => {
-  return computeStatesCount(forestState.value)
+  return countStates(forestState.value)
 });
 
 const playOrPauseButtonIcon: string = computed(() => {
