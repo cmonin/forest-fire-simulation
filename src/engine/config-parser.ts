@@ -3,7 +3,7 @@ import type {TreeState} from "@/types/tree-state";
 
 export function parseFile(text: string): {forestState: ForestState, burnProbability: number} {
     const textRows: string[] = text.split('\n')
-    if (textRows[0].charAt(0) === '0') {
+    if (textRows[0].charAt(0) === '0' || textRows[0].charAt(0) === '1') {
         return parseTextToForestState(textRows)
     }
     return parsePropertiesToForestState(textRows)
@@ -42,6 +42,7 @@ function parsePropertiesToForestState(propertiesRows: string[]): {forestState: F
                 break
             case 'probability':
                 burnProbability = parseFloat(right)
+                break
             default:
                 break
         }
